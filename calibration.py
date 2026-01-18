@@ -1,159 +1,176 @@
-from my_pycar import PyCar, get_key
+from my_pycar import PyCar
 from time import sleep
+import tkinter as tk
+import subprocess
 
+keylabel = None
+menulabel = None
+dscrlabel = None
+actionlabel = None
+infolabel = None
 
-def main():
-    #Introduction
-    print("""
-    This is a calibration program to set the correct initial angles.
+keypressed = False
+step = 0.5
+menu = None
 
-    To go back or exit click backspace.
-    """)
+keys = {
+    "w": False, "a": False, "s": False, "d": False,
+    "left": False, "right": False,
+    "equal": False, "minus": False,
+    }
+menu_keys = ["1", "2"]
 
-    backspace = "\x7f" #this is the ASCII code for a backspace
+px = PyCar()
 
-    px = PyCar() #this is our car object
-
-    #I am using while loops and the get_key function to imitate a keyboard listener.
-    #In simpler words, I am removing the need to press enter every time you hit a key on your keyboard.
-
-
-    #Boolean variables to control the while loops
-    run = True
-    run1 = True
-    run2 = True
-
-    print("""
-        You are currently in the main menu.
-
-        Menu:
-        Calibrate the camera - Press 1
-        Calibrate the servos - Press 2
-        Reset all angles - Press 3
-        Reset cam angles - Press 4
-        Reset servo angles - Press 5
+def logic(root):
+    global step
+    
+    #only used for reset
+    if menu is None:
+        menulabel.config(text="Main menu")
+        dscrlabel.config(text="Reset would affect all")
+    if menu == "1":
+        menulabel.config(text="Camera menu")
+        dscrlabel.config(text="Reset would affect only the camera")
+    if menu == "2":
+        menulabel.config(text="Servo menu")
+        dscrlabel.config(text="Reset would affect only the servos")
         
-        """)
-    while run:
-        k = get_key()
-        if k == backspace:
-            print("Exiting the program.")
-            print(f"""
-    The final angles are:
-    servo - {px.get_servo()}
-    pan - {px.get_pan()}
-    tilt - {px.get_tilt()}
-            """)
-            run = False
-        if k == "1":
-            print("""
-            You are in the camera mode.
-            
-            To tilt up/down press w/s on your keyboard.
-            To pan left/right press a/d on your keyboard.
-            """)
-            
-            step = float(input("Type the value by which the angle will be changed each time. E.g. 0.5"))
-            print(f"Step: {step}")
-            
-            run1 = True
-            while run1:
-                px.reset_position()
-                tilt = px.get_tilt()
-                pan = px.get_pan()
-                q = get_key()
-                
-                if q == backspace:
-                    print("Exiting the cam menu.")
-                    print("1 - cam mode. 2 - servo mode. 3 - reset all. 4 - reset cam. 5 - reset servo. 6 - show angles. Backspace - exit")
-                    run1 = False
-                    
-                if q == "w":
-                    tilt += step
-                    px.set_tilt(tilt)
-                    print(f"pan: {px.get_pan()}, tilt: {px.get_tilt()}") #getter instead of variable to check memory
-                if q == "s":
-                    tilt -= step
-                    px.set_tilt(tilt)
-                    print(f"pan: {px.get_pan()}, tilt: {px.get_tilt()}")
-                if q == "a":
-                    pan -= step
-                    px.set_pan(pan)
-                    print(f"pan: {px.get_pan()}, tilt: {px.get_tilt()}") 
-                if q == "d":
-                    pan += step
-                    px.set_pan(pan)
-                    print(f"pan: {px.get_pan()}, tilt: {px.get_tilt()}")
-                    
-        if k == "2":
-            print("""
-            You are in the servo mode.
-            
-            To turn left/right press a/d on your keyboard.
-            """)
-            
-            step = float(input("Type the value by which the angle will be changed each time. E.g. 0.5"))
-            print(f"Step: {step}")
-            
-            run2 = True
-            while run2:
-                px.reset_position()
-                servo = px.get_servo()
-                r = get_key()
-                
-                if r == backspace:
-                    print("Exiting the servo menu.")
-                    print("1 - cam mode. 2 - servo mode. 3 - reset all. 4 - reset cam. 5 - reset servo. 6 - show angles. Backspace - exit")
-                    run2 = False
-                
-                if r == "a":
-                    servo -= step
-                    px.set_servo(servo)
-                    print(f"The angle now is: {px.get_servo()}") #get_servo instead of servo to check memory
-                if r == "d":
-                    servo += step
-                    px.set_servo(servo)
-                    print(f"The angle now is: {px.get_servo()}")                
+    if keys["w"] and not keys["s"]:
+        px.tilt(step, up=True)
+        actionlabel.config(text=f"Tilting up by {round(step, 1)}")
+    if keys["s"] and not keys["w"]:
+        px.tilt(step, down=True)
+        actionlabel.config(text=f"Tilting down by {round(step, 1)}")
+    if keys["a"] and not keys["d"]:
+        px.pan(step, left=True)
+        actionlabel.config(text=f"Panning left by {round(step, 1)}")
+    if keys["d"] and not keys["a"]:
+        px.pan(step, right=True)
+        actionlabel.config(text=f"Panning right by {round(step, 1)}")
+    
+    if keys["left"] and not keys["right"]:
+        px.steer(step, left=True)
+        actionlabel.config(text=f"Steering left by {round(step, 1)}")
+    if keys["right"] and not keys["left"]:
+        px.steer(step, right=True)
+        actionlabel.config(text=f"Steering right by {round(step, 1)}")
+    
+    if keys["equal"] and not keys["minus"]:
+        step += 0.1
+        actionlabel.config(text="Increasing step")
+        sleep(0.2)
+    if keys["minus"] and not keys["equal"] and round(step, 1) > 0:
+        step -= 0.1
+        actionlabel.config(text="Decreasing step")
+        sleep(0.2)
+    
+    q = None
+    for key in keys:
+        if keys[key]:
+            q = key
+    
+    if keys["equal"]: #if you press + on a keyboard without holding shift then it's =
+        q = "plus"
+    
+        
+    infolabel.config(text=f"""
+Servo: {round(px.servodir, 1)}, Pan: {round(px.pandir, 1)}, Tilt: {round(px.tiltdir, 1)}
+Step: {round(step, 1)}
+Key pressed: {q}
+                                """)
+    
+    if not keypressed:
+        actionlabel.config(text="No action done")
+    
+    #call again after 20ms
+    root.after(20, lambda: logic(root))
 
-        if k == "3":
-            print("Resetting all angles.")
-            px.reset_angles()
-            px.reset_position()
-            print(f"""
-    The angles now are:
-    servo - {px.get_servo()}
-    pan - {px.get_pan()}
-    tilt - {px.get_tilt()}
-            """)
-            
-        if k == "4":
-            print("Resetting cam angles.")
-            px.set_pan(0)
-            px.set_tilt(0)
-            px.reset_position()
-            print(f"""
-    The angles now are:
-    servo - {px.get_servo()}
-    pan - {px.get_pan()}
-    tilt - {px.get_tilt()}
-            """)
-        if k == "5":
-            print("Resetting servo angles.")
-            px.set_servo(0)
-            px.reset_position()
-            print(f"""
-    The angles now are:
-    servo - {px.get_servo()}
-    pan - {px.get_pan()}
-    tilt - {px.get_tilt()}
-            """)
-        if k == "6":
-            print(f"""
-    The angles now are:
-    servo - {px.get_servo()}
-    pan - {px.get_pan()}
-    tilt - {px.get_tilt()}
-            """)
-            
+
+
+def on_key_press(event):
+    global keypressed
+    global menu
+    keypressed = True
+    k = event.keysym.lower()
+    
+    if k in keys:
+        keys[k] = True
+    if k in menu_keys:
+        menu = k
+    if k == "backspace":
+        menu = None
+        return
+    
+    if k == "r":
+        match menu:
+            case "1":
+                actionlabel.config(text="Resetting the camera")
+                px.set_neutral(cam=True)
+            case "2":
+                actionlabel.config(text="Resetting the servo")
+                px.servodir = 0
+            case _:
+                actionlabel.config(text="Resetting all")
+                px.set_neutral()
+        px.upd_dir()
+
+        
+def on_key_release(event):
+    global keypressed
+    keypressed = False
+    k = event.keysym.lower()
+    if k in keys:
+        keys[k] = False
+    
+def main():
+    subprocess.run(["xset", "r", "off"], check=False)
+    root = tk.Tk()
+    root.title("Calibration")
+    root.geometry("800x600")
+    
+    header = tk.Label(root, text="Calibration program", font=("Arial", 20))
+    header.pack(pady=10)
+    
+    manual = tk.Label(root, text="""
+To move the camera use w/a/s/d
+To move the servos use the arrows left/right
+To increase/decrease the step by which the angles are changing press +/-
+To reset press r
+To pick reset option press 1 for camera, 2 for servos, none for all
+To exit the current menu (reset option) press backspace
+""", font=("Arial", 12))
+    manual.pack(pady=10)
+    
+    global keylabel
+    keylabel = tk.Label(root, text="", font=("Arial", 14))
+    keylabel.pack(pady=10)
+    
+    global menulabel
+    menulabel = tk.Label(root, text="", font=("Arial", 16))
+    menulabel.pack(pady=10)
+    
+    global dscrlabel #description label
+    dscrlabel = tk.Label(root, text="", font=("Arial", 12))
+    dscrlabel.pack(pady=10)
+    
+    global actionlabel
+    actionlabel = tk.Label(root, text="", font=("Arial", 14))
+    actionlabel.pack(pady=10)
+    
+    global infolabel
+    infolabel = tk.Label(root, text="", font=("Arial", 14))
+    infolabel.pack(pady=20)
+    
+    root.bind("<KeyPress>", on_key_press)
+    root.bind("<KeyRelease>", on_key_release)
+    
+    logic(root)
+    
+    try:
+        root.mainloop()
+    finally:
+        subprocess.run(["xset", "r", "on"], check=False)
+
 if __name__ == "__main__":
     main()
