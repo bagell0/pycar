@@ -15,8 +15,8 @@ class PyCar(Picarx):
         super().__init__()
         
         self.dir_servo_calibrate(servo_offset)
-        self.cam_pan_servo_calibrate(pan_offset)
-        self.cam_tilt_servo_calibrate(tilt_offset)
+        self.cam_pan_servo_calibrate(-1*pan_offset)
+        self.cam_tilt_servo_calibrate(-1*tilt_offset)
         
         #direction angles
         self.servodir = 0

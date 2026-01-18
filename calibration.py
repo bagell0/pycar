@@ -10,7 +10,6 @@ actionlabel = None
 infolabel = None
 
 keypressed = False
-step = 0.5
 menu = None
 
 keys = {
@@ -23,7 +22,6 @@ menu_keys = ["1", "2"]
 px = PyCar()
 
 def logic(root):
-    global step
     
     #only used for reset
     if menu is None:
@@ -37,31 +35,31 @@ def logic(root):
         dscrlabel.config(text="Reset would affect only the servos")
         
     if keys["w"] and not keys["s"]:
-        px.tilt(step, up=True)
-        actionlabel.config(text=f"Tilting up by {round(step, 1)}")
+        px.tilt(up=True)
+        actionlabel.config(text=f"Tilting up by {round(px.step, 1)}")
     if keys["s"] and not keys["w"]:
-        px.tilt(step, down=True)
-        actionlabel.config(text=f"Tilting down by {round(step, 1)}")
+        px.tilt(down=True)
+        actionlabel.config(text=f"Tilting down by {round(px.step, 1)}")
     if keys["a"] and not keys["d"]:
-        px.pan(step, left=True)
-        actionlabel.config(text=f"Panning left by {round(step, 1)}")
+        px.pan(left=True)
+        actionlabel.config(text=f"Panning left by {round(px.step, 1)}")
     if keys["d"] and not keys["a"]:
-        px.pan(step, right=True)
-        actionlabel.config(text=f"Panning right by {round(step, 1)}")
+        px.pan(right=True)
+        actionlabel.config(text=f"Panning right by {round(px.step, 1)}")
     
     if keys["left"] and not keys["right"]:
-        px.steer(step, left=True)
-        actionlabel.config(text=f"Steering left by {round(step, 1)}")
+        px.steer(left=True)
+        actionlabel.config(text=f"Steering left by {round(px.step, 1)}")
     if keys["right"] and not keys["left"]:
-        px.steer(step, right=True)
-        actionlabel.config(text=f"Steering right by {round(step, 1)}")
+        px.steer(right=True)
+        actionlabel.config(text=f"Steering right by {round(px.step, 1)}")
     
     if keys["equal"] and not keys["minus"]:
-        step += 0.1
+        px.step += 0.1
         actionlabel.config(text="Increasing step")
         sleep(0.2)
-    if keys["minus"] and not keys["equal"] and round(step, 1) > 0:
-        step -= 0.1
+    if keys["minus"] and not keys["equal"] and round(px.step, 1) > 0:
+        px.step -= 0.1
         actionlabel.config(text="Decreasing step")
         sleep(0.2)
     
@@ -76,7 +74,7 @@ def logic(root):
         
     infolabel.config(text=f"""
 Servo: {round(px.servodir, 1)}, Pan: {round(px.pandir, 1)}, Tilt: {round(px.tiltdir, 1)}
-Step: {round(step, 1)}
+Step: {round(px.step, 1)}
 Key pressed: {q}
                                 """)
     

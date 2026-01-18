@@ -4,7 +4,7 @@ import subprocess
 
 label = None
 
-px = PyCar(2.5, 3.6, 7.9) 
+px = PyCar(0, 2.7, 9) 
 
 keys = {"w": False, "a": False, "s": False, "d": False, "space": False}
 
