@@ -1,10 +1,4 @@
 from picarx import Picarx
-from time import sleep
-import sys
-import tty
-import termios
-import select
-
 
 class PyCar(Picarx):
     
