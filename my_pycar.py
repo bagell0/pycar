@@ -1,9 +1,10 @@
 from picarx import Picarx
 
+
 class PyCar(Picarx):
     
-    DEFAULT_SPEED = 10
-    DEFAULT_STEP = 2
+    DEFAULT_SPEED = 20
+    DEFAULT_STEP = 1
     
     def __init__(self, servo_offset=0, pan_offset=0, tilt_offset=0):
         super().__init__()
@@ -38,21 +39,21 @@ class PyCar(Picarx):
             
     #directing methods
     def steer(self, right=False, left=False):
-        if right and self.servodir < self.DIR_MAX:
+        if right and (self.servodir+self.step) < self.DIR_MAX:
             self.servodir += self.step
-        if left and self.servodir > self.DIR_MIN:
+        if left and (self.servodir-self.step) > self.DIR_MIN:
             self.servodir -= self.step
         self.upd_dir()
     def pan(self, right=False, left=False):
-        if right and self.pandir < self.CAM_PAN_MAX:
+        if right and (self.pandir+self.step) < self.CAM_PAN_MAX:
             self.pandir += self.step
-        if left and self.pandir > self.CAM_PAN_MIN:
+        if left and (self.pandir-self.step) > self.CAM_PAN_MIN:
             self.pandir -= self.step
         self.upd_dir()
     def tilt(self, up=False, down=False):
-        if up and self.tiltdir < self.CAM_TILT_MAX:
+        if up and (self.tiltdir+self.step) < self.CAM_TILT_MAX:
             self.tiltdir += self.step
-        if down and self.tiltdir > self.CAM_TILT_MIN:
+        if down and (self.tiltdir-self.step) > self.CAM_TILT_MIN:
             self.tiltdir -= self.step
         self.upd_dir()
     
@@ -61,4 +62,3 @@ class PyCar(Picarx):
         self.forward(self.speed)
     def bck(self):
         self.backward(self.speed)
-

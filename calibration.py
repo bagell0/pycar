@@ -15,8 +15,8 @@ menu = None
 keys = {
     "w": False, "a": False, "s": False, "d": False,
     "left": False, "right": False,
-    "equal": False, "minus": False,
     }
+
 menu_keys = ["1", "2"]
 
 px = PyCar()
@@ -54,22 +54,11 @@ def logic(root):
         px.steer(right=True)
         actionlabel.config(text=f"Steering right by {round(px.step, 1)}")
     
-    if keys["equal"] and not keys["minus"]:
-        px.step += 0.1
-        actionlabel.config(text="Increasing step")
-        sleep(0.2)
-    if keys["minus"] and not keys["equal"] and round(px.step, 1) > 0:
-        px.step -= 0.1
-        actionlabel.config(text="Decreasing step")
-        sleep(0.2)
     
     q = None
     for key in keys:
         if keys[key]:
             q = key
-    
-    if keys["equal"]: #if you press + on a keyboard without holding shift then it's =
-        q = "plus"
     
         
     infolabel.config(text=f"""
@@ -112,7 +101,11 @@ def on_key_press(event):
                 actionlabel.config(text="Resetting all")
                 px.set_neutral()
         px.upd_dir()
-
+        
+    if k == "equal": #key for plus without shift
+        px.step += 0.1
+    if k == "minus":
+        px.step -= 0.1
         
 def on_key_release(event):
     global keypressed
