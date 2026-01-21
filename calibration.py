@@ -122,7 +122,6 @@ def on_key_release(event):
         keys[k] = False
     
 def main():
-    subprocess.run(["xset", "r", "off"], check=False)
     root = tk.Tk()
     root.title("Calibration")
     root.geometry("800x600")
@@ -168,7 +167,12 @@ To exit the current menu (reset option) press backspace
     try:
         root.mainloop()
     finally:
-        subprocess.run(["xset", "r", "on"], check=False)
+        print(f"""
+Servo: {round(px.servodir, 1)},
+Pan: {round(px.pandir, 1)},
+Tilt: {round(px.tiltdir, 1)}
+""")
+        px.stop()
 
 if __name__ == "__main__":
     main()
